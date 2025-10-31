@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aarogya Queue System 🏥</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary-dark: #1F456D;
+  --secondary-teal: #00A9A5;
+  --light-bg: #F7F9FC;
+  --card-bg: #FFFFFF;
+  --danger-red: #E74C3C;
+  --success-green: #27AE60;
+  --shadow: 0 10px 30px rgba(31,69,109,0.1);
+  --border-radius: 12px;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--light-bg);
+  margin: 0;
+  padding: 30px;
+  text-align: center;
+  color: #34495e;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 🔹 Blurred background image */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('ma.png') no-repeat center center/cover;
+  filter: blur(10px);
+  z-index: -1; /* Keeps it behind content */
+  opacity: 0.6; /* Adjust for visibility */
+}
+
+.hidden { display: none; }
+h1 { color: var(--primary-dark); }
+.auth-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.auth-form {
+  background: white; padding: 20px; border-radius: 10px; box-shadow: var(--shadow);
+  width: 300px;
+}
+input, select, button {
+  width: 90%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc;
+}
+button.action-btn {
+  background: var(--secondary-teal); color: white; border: none; cursor: pointer;
+}
+button.action-btn:hover { background: #00938f; }
+.queue-box { background: white; padding: 20px; border-radius: 10px; box-shadow: var(--shadow); margin-top: 20px; }
+ul { list-style:none; padding:0; }
+ul li { background:#f0f4f7; margin:5px 0; padding:8px; border-radius:5px; }
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--primary-dark);
+  color: white;
+  padding: 10px;
+  font-size: 0.9em;
+  text-align: center;
+}
+#doctorDashboard {
+  background: var(--primary-dark);
+  color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#doctorDashboard .queue-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+#doctorDashboard select,
+#doctorDashboard button {
+  background: #97e6f2;
+  color: rgb(10, 10, 10);
+  border: none;
+}
+#doctorDashboard .queue-box h3 {
+  color: #f8f5f7; /* darker pink title */
+}
+
+#doctorDashboard .queue-box ul li {
+  background: #4c042a; /* pink list background */
+}
+/* 🔹 Patient Dashboard Theme */
+#patientDashboard {
+  background: rgba(0, 169, 165, 0.1); /* light teal background */
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-top: 20px;
+}
+
+#patientDashboard h2 {
+  color: var(--secondary-teal);
+}
+
+#patientDashboard .queue-box {
+  background: #e0f7f6; /* pale teal box */
+}
+
+#patientDashboard button.action-btn {
+  background: var(--secondary-teal);
+}
+
+#patientDashboard button.action-btn:hover {
+  background: #008c89;
+}
+
+
+</style>
+</head>
+<body>
+
+<h1>Aarogya Queue System 🏥</h1>
+
+<!-- Login Section -->
+<section id="loginScreen">
+  <div class="auth-grid">
+    <div class="auth-form">
+      <h3>Patient Login</h3>
+      <input type="text" id="loginPatientPhone" placeholder="Phone Number (+91XXXXXXXXXX)">
+      <button id="patientLoginBtn" class="action-btn">Login/Register</button>
+    </div>
+    <div class="auth-form">
+      <h3>Doctor Login</h3>
+      <input type="text" id="loginDoctorUser" placeholder="Doctor Username">
+      <input type="password" id="loginDoctorPass" placeholder="Password">
+      <button id="doctorLoginBtn" class="action-btn">Doctor Login</button>
+    </div>
+    <div class="auth-form">
+      <h3>Admin Login</h3>
+      <input type="text" id="loginAdminUser" placeholder="Admin Username">
+      <input type="password" id="loginAdminPass" placeholder="Password">
+      <button id="adminLoginBtn" class="action-btn">Admin Login</button>
+    </div>
+  </div>
+</section>
+
+<!-- Patient Dashboard -->
+<section id="patientDashboard" class="hidden">
+  <h2>Welcome, <span id="patientDisplayName"></span></h2>
+  <button onclick="logout()" class="action-btn" style="background:var(--danger-red);width:auto;">Logout</button>
+  <div class="queue-box">
+    <h3>Join Queue</h3>
+    <input type="text" id="patientName" placeholder="Patient Name">
+    <select id="department">
+      <option value="">Select Department</option>
+      <option value="General Medicine">General Medicine</option>
+      <option value="Dental">Dental</option>
+      <option value="Cardiology">Cardiology</option>
+      <option value="Pediatrics">Pediatrics</option>
+    </select>
+    <button id="joinQueueBtn" class="action-btn">Join Queue</button>
+    <p id="joinQueueError" style="color:red;"></p>
+    <h3>Your Token: <span id="yourTokenNumber">--</span></h3>
+  </div>
+  <div class="queue-box">
+    <h3>Visit History</h3>
+    <ul id="patientHistoryList"><li>No past visits.</li></ul>
+  </div>
+</section>
+
+<!-- Doctor Dashboard -->
+<section id="doctorDashboard" class="hidden">
+  <h2>Doctor Dashboard (<span id="doctorDeptTitle"></span>)</h2>
+  <button onclick="logout()" class="action-btn" style="background:var(--danger-red);width:auto;">Logout</button>
+  <select id="doctorDept">
+    <option value="">Select Department</option>
+    <option value="General Medicine">General Medicine</option>
+    <option value="Dental">Dental</option>
+    <option value="Cardiology">Cardiology</option>
+    <option value="Pediatrics">Pediatrics</option>
+  </select>
+  <div class="queue-box">
+    <h3>Waiting Queue</h3>
+    <ul id="doctorQueueList"><li>No patients waiting.</li></ul>
+  </div>
+  <button id="callNextDeptBtn" class="action-btn" style="background:var(--success-green);">Call Next</button>
+</section>
+
+<!-- Admin Dashboard -->
+<section id="adminDashboard" class="hidden">
+  <h2>Admin Monitor</h2>
+  <button onclick="logout()" class="action-btn" style="background:var(--danger-red);width:auto;">Logout</button>
+  <div id="adminQueueContainer"><p>No queues to display.</p></div>
+</section>
+
+<div class="footer">© 2025 Aarogya Hospital Queue System</div>
+
+<script>
+let currentUser = null;
+let currentRole = null;
+let patientQueue = [];
+let doctorCompleted = [];
+
+function showSection(id){
+  ["loginScreen","patientDashboard","doctorDashboard","adminDashboard"].forEach(s=>document.getElementById(s).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
+function logout(){ currentUser=null; currentRole=null; showSection("loginScreen"); }
+
+document.getElementById("patientLoginBtn").addEventListener("click",()=>{
+  const phone=document.getElementById("loginPatientPhone").value.trim();
+  if(!/^\+91[0-9]{10}$/.test(phone)) return alert("Enter valid +91XXXXXXXXXX");
+  currentUser=phone; currentRole="patient";
+  document.getElementById("patientDisplayName").textContent=phone;
+  showSection("patientDashboard");
+});
+
+document.getElementById("doctorLoginBtn").addEventListener("click",()=>{
+  const user=document.getElementById("loginDoctorUser").value.trim();
+  const pass=document.getElementById("loginDoctorPass").value.trim();
+  if(user && pass){ currentUser=user; currentRole="doctor"; showSection("doctorDashboard"); }
+  else alert("Enter credentials");
+});
+
+document.getElementById("adminLoginBtn").addEventListener("click",()=>{
+  const user=document.getElementById("loginAdminUser").value.trim();
+  const pass=document.getElementById("loginAdminPass").value.trim();
+  if(user && pass){ currentUser=user; currentRole="admin"; showSection("adminDashboard"); renderAdminQueue(); }
+  else alert("Enter credentials");
+});
+
+document.getElementById("joinQueueBtn").addEventListener("click",()=>{
+  const name=document.getElementById("patientName").value.trim();
+  const dept=document.getElementById("department").value;
+  if(!name || !dept){ document.getElementById("joinQueueError").textContent="Enter name & department"; return; }
+  const token=patientQueue.length+1;
+  const patient={name,dept,token,phone:currentUser};
+  patientQueue.push(patient);
+  document.getElementById("yourTokenNumber").textContent=token;
+  renderPatientHistory();
+  renderAdminQueue();
+});
+
+document.getElementById("doctorDept").addEventListener("change",()=>{
+  const dept=document.getElementById("doctorDept").value;
+  document.getElementById("doctorDeptTitle").textContent=dept;
+  renderDoctorQueue(dept);
+});
+
+document.getElementById("callNextDeptBtn").addEventListener("click",async()=>{
+  const dept=document.getElementById("doctorDept").value;
+  if(!dept) return alert("Select department");
+  const index=patientQueue.findIndex(p=>p.dept===dept);
+  if(index===-1) return alert("No patients waiting");
+  const patient=patientQueue.splice(index,1)[0];
+  doctorCompleted.push(patient);
+  renderDoctorQueue(dept);
+  renderAdminQueue();
+  try{
+    const res=await fetch("http://localhost:3000/notify",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:patient.name,phone:patient.phone,department:patient.dept})
+    });
+    const data=await res.json();
+    if(data.success) alert("SMS sent to "+patient.name);
+    else console.error("SMS failed:",data.error);
+  }catch(e){ console.error(e); }
+});
+
+function renderPatientHistory(){
+  const list=document.getElementById("patientHistoryList");
+  list.innerHTML="";
+  const visits=patientQueue.filter(p=>p.phone===currentUser)
+    .concat(doctorCompleted.filter(p=>p.phone===currentUser));
+  if(visits.length===0){ list.innerHTML="<li>No past visits.</li>"; return; }
+  visits.forEach(p=>list.innerHTML+=`<li>${p.name} - ${p.dept} - Token ${p.token}</li>`);
+}
+
+function renderDoctorQueue(dept){
+  const q=document.getElementById("doctorQueueList");
+  q.innerHTML="";
+  const waiting=patientQueue.filter(p=>p.dept===dept);
+  if(waiting.length===0){ q.innerHTML="<li>No patients waiting.</li>"; return; }
+  waiting.forEach(p=>q.innerHTML+=`<li>${p.name} - Token ${p.token}</li>`);
+}
+
+function renderAdminQueue(){
+  const c=document.getElementById("adminQueueContainer");
+  c.innerHTML="";
+  const depts=[...new Set(patientQueue.map(p=>p.dept))];
+  if(depts.length===0){ c.innerHTML="<p>No queues to display.</p>"; return; }
+  depts.forEach(d=>{
+    const list=patientQueue.filter(p=>p.dept===d);
+    let html=`<div class="queue-box"><h3>${d}</h3><ul>`;
+    list.forEach(p=>{ html+=`<li>${p.name} - Token ${p.token}</li>`; });
+    html+="</ul></div>";
+    c.innerHTML+=html;
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+node_modules/
+.env
+.vscode/
+# macOS
+.DS_Store
+# logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+*.log
+node_modules# Internal artifacts and sensitive files
+replacements.txt
+repo.git/
+clean-check/
+verify-push/
+verify-push2/
+clean-check-verify/
+hospital-queue-system/
+.env
